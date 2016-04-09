@@ -1,7 +1,7 @@
 ﻿//React component that takes in some text as a property and displays it
 var Tweet = React.createClass({
 	render: function() {
-	    return (<li className="list-group-item">
+	    return (<li className="clearfix list-group-item">
             {this.props.text}
 	    {this.props.children}
 	    </li>)
@@ -10,7 +10,7 @@ var Tweet = React.createClass({
 
 var Button = React.createClass({
     render: function() {
-        return <button className="btn btn-info pull-right">{this.props.label}</button>
+        return <button onClick={this.props.link} className="btn btn-info pull-right">{this.props.label}</button>
     }
 });
 
@@ -44,8 +44,26 @@ var App = React.createClass({
     });
     },
 
+    pin: function(tweet){
+        var self=this;
+        fetch('/pinTweet', {method: 'post',headers:new Headers({'Content-Type':'application/json'}),
+            body:JSON.stringify(tweet)
+        })
+       .then(function(response) {
+           var data=self.state.pinnedTweets;
+           data.push(tweet);
+           self.setState({pinnedTweets:data});
+         
+       })
+        .catch(function(error)
+        {
+            console.error('Error',error);
+
+        });
+    },
     //React function that runs on first load and whenever the state is changed
     render: function() {
+        var self=this;
         var pinnedTweets = (this.state.pinnedTweets.length > 0) ? this.state.pinnedTweets.map(function(tweet) {
             return <Tweet key={tweet.Id} text={tweet.Text} />
             })
@@ -54,7 +72,7 @@ var App = React.createClass({
             return (
                 
                 <Tweet key={tweet.Id} text={tweet.Text} >
-                    <Button label="Pin"/>
+                    <Button link={function(){self.pin(tweet)}}label="Pin"/>
                 </Tweet>
                  )
 		    })
